@@ -5,7 +5,7 @@ package it.unibo.pps.tasks.adts
  *  the test in ComplexTest.
  */
 
-object Ex1ComplexNumbers:
+object Ex1ComplexNumber:
 
   trait ComplexADT:
     type Complex
@@ -19,12 +19,27 @@ object Ex1ComplexNumbers:
 
   object BasicComplexADT extends ComplexADT:
 
-    // Change assignment below: should probably define a case class and use it?
-    type Complex = Nothing 
-    def complex(re: Double, im: Double): Complex = ???
+    case class ComplexNumber(real: Double, imaginary: Double)
+
+    type Complex = ComplexNumber
+    def complex(re: Double, im: Double): Complex = ComplexNumber(re, im)
     extension (complex: Complex)
-      def re(): Double = ???
-      def im(): Double = ???
-      def sum(other: Complex): Complex = ???
-      def subtract(other: Complex): Complex = ???
-      def asString(): String = ???
+      def re(): Double = complex.real
+      def im(): Double = complex.imaginary
+      def sum(other: Complex): Complex = ComplexNumber(complex.real + other.real, complex.imaginary + other.imaginary)
+      def subtract(other: Complex): Complex = ComplexNumber(complex.real - other.real, complex.imaginary - other.imaginary)
+      def asString(): String = complex match
+        case c if c.real != 0.0 || c.imaginary != 0.0 => s"${_realAsString()}${_signAsString()}${_imaginaryAsString()}"
+        case _ => s"${complex.real}"
+      private def _realAsString(): String = complex.real match
+        case re if re != 0.0 => s"$re"
+        case _ => ""
+      private def _signAsString(): String = complex match
+        case c if c.real != 0.0 && c.imaginary > 0.0 => " + "
+        case c if c.real != 0.0 && c.imaginary < 0.0 => " - "
+        case c if c.real == 0.0 && c.imaginary < 0.0 => "-"
+        case _ => ""
+      private def _imaginaryAsString(): String = complex.imaginary match
+        case im if im > 0.0 => s"${im}i"
+        case im if im < 0.0 => s"${-im}i"
+        case _ => ""
