@@ -1,6 +1,9 @@
 package it.unibo.pps.tasks.adts
 
-import it.unibo.pps.u03.extensionmethods.Sequences.Sequence, Sequence.*
+import it.unibo.pps.u03.extensionmethods.Sequences.Sequence
+import Sequence.*
+
+import scala.annotation.tailrec
 
 /*  Exercise 2: 
  *  Implement the below trait, and write a meaningful test.
@@ -111,22 +114,40 @@ object SchoolModel:
        *
        */
       def hasCourse(name: String): Boolean
-  object BasicSchoolModule extends SchoolModule:
-    override type School = Nothing
-    override type Teacher = Nothing
-    override type Course = Nothing
 
-    def teacher(name: String): Teacher = ???
-    def course(name: String): Course = ???
-    def emptySchool: School = ???
+  object BasicSchoolModule extends SchoolModule:
+
+    case class SchoolType(teachersList: Sequence[Teacher], coursesList: Sequence[Course])
+    case class TeacherType(name: String)
+    case class CourseType(name: String)
+
+    override type School = SchoolType
+    override type Teacher = TeacherType
+    override type Course = CourseType
+
+    def teacher(name: String): Teacher = TeacherType(name)
+    def course(name: String): Course = CourseType(name)
+    def emptySchool: School = SchoolType(Nil(), Nil())
 
     extension (school: School)
-      def courses: Sequence[String] = ???
-      def teachers: Sequence[String] = ???
-      def setTeacherToCourse(teacher: Teacher, course: Course): School = ???
+      def courses: Sequence[String] =
+        school.coursesList.map(course => course.name)
+      def teachers: Sequence[String] =
+        school.teachersList.map(teacher => teacher.name)
+      def setTeacherToCourse(teacher: Teacher, course: Course): School =
+        val teachers = school.hasTeacher(teacher.name) match
+          case true => school.teachersList
+          case _ => Cons(teacher, school.teachersList)
+        val courses = school.hasCourse(course.name) match
+          case true => school.coursesList
+          case _ => Cons(course, school.coursesList)
+        SchoolType(teachers, courses)
       def coursesOfATeacher(teacher: Teacher): Sequence[Course] = ???
-      def hasTeacher(name: String): Boolean = ???
-      def hasCourse(name: String): Boolean = ???
+      def hasTeacher(name: String): Boolean =
+        !school.teachers.filter(teacher => teacher == name).equals(Nil())
+      def hasCourse(name: String): Boolean =
+        !school.courses.filter(course => course == name).equals(Nil())
+
 @main def examples(): Unit =
   import SchoolModel.BasicSchoolModule.*
   val school = emptySchool
