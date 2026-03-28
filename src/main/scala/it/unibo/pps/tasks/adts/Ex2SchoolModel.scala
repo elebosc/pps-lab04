@@ -2,6 +2,7 @@ package it.unibo.pps.tasks.adts
 
 import it.unibo.pps.u03.extensionmethods.Sequences.Sequence
 import Sequence.*
+import it.unibo.pps.u03.Optionals.Optional
 
 import scala.annotation.tailrec
 
@@ -93,7 +94,7 @@ object SchoolModel:
        *   .coursesOfATeacher(teacher("John")) // => Cons("Math", Cons("Italian", Nil()))
        * @return the list of courses assigned to a teacher
        */
-      def coursesOfATeacher(teacher: Teacher): Sequence[Course]
+      def coursesOfATeacher(teacher: Teacher): Sequence[String]
       /**
        * This method should return true if the teacher is present in the school
        * e.g.,
@@ -118,35 +119,71 @@ object SchoolModel:
   object BasicSchoolModule extends SchoolModule:
 
     case class SchoolType(teachersList: Sequence[Teacher], coursesList: Sequence[Course])
-    case class TeacherType(name: String)
+    case class TeacherType(name: String, courses: Sequence[Course])
     case class CourseType(name: String)
 
     override type School = SchoolType
     override type Teacher = TeacherType
     override type Course = CourseType
 
-    def teacher(name: String): Teacher = TeacherType(name)
+    def teacher(name: String): Teacher = TeacherType(name, Nil())
     def course(name: String): Course = CourseType(name)
     def emptySchool: School = SchoolType(Nil(), Nil())
+    private def _teacher(name: String, courses: Sequence[Course]) = TeacherType(name, courses)
 
     extension (school: School)
-      def courses: Sequence[String] =
-        school.coursesList.map(course => course.name)
-      def teachers: Sequence[String] =
-        school.teachersList.map(teacher => teacher.name)
+
+      def courses: Sequence[String] = school match
+        case School(_, courses) => courses.map {
+          case Course(name) => name
+        }
+
+      def teachers: Sequence[String] = school match
+        case School(teachers, _) => teachers.map {
+          case Teacher(name, _) => name
+        }
+
       def setTeacherToCourse(teacher: Teacher, course: Course): School =
-        val teachers = school.hasTeacher(teacher.name) match
-          case true => school.teachersList
-          case _ => Cons(teacher, school.teachersList)
-        val courses = school.hasCourse(course.name) match
-          case true => school.coursesList
-          case _ => Cons(course, school.coursesList)
-        SchoolType(teachers, courses)
-      def coursesOfATeacher(teacher: Teacher): Sequence[Course] = ???
+        val updatedTeachers = _updateTeachersIfNecessary(teacher, course)
+        val updatedCourses = _updateCoursesIfNecessary(course)
+        SchoolType(updatedTeachers, updatedCourses)
+
+      def coursesOfATeacher(teacher: Teacher): Sequence[String] =
+        val foundTeacher = (school, teacher) match
+          case (School(teachers, _), Teacher(name, courses)) => teachers.filter {
+            case Teacher(n, _) => n == name
+          }
+        foundTeacher match
+          case Nil() => Nil()
+          case Cons(Teacher(_, courses), _) => courses.map {
+            case Course(name) => name
+          }
+      
       def hasTeacher(name: String): Boolean =
         !school.teachers.filter(teacher => teacher == name).equals(Nil())
+
       def hasCourse(name: String): Boolean =
         !school.courses.filter(course => course == name).equals(Nil())
+      
+      private def _teacherHasCourse(teacher: Teacher, course: Course): Boolean = teacher match
+        case Teacher(_, courses) => !courses.filter(c => c.equals(course)).equals(Nil())
+      
+      private def _updateTeachersIfNecessary(teacher: Teacher, course: Course): Sequence[Teacher] =
+        (school, teacher) match
+          case (School(teachers, _), Teacher(name, courses)) if school.hasTeacher(name) && _teacherHasCourse(teacher, course) =>
+            teachers
+          case (School(teachers, _), Teacher(name, courses)) if school.hasTeacher(name) && !_teacherHasCourse(teacher, course) =>
+            Cons(
+              _teacher(name, Cons(course, courses)),
+              teachers.filter {
+                case Teacher(n, _) => n == name
+              }
+            )
+          case (School(teachers, _), Teacher(name, courses)) => Cons(_teacher(name, Cons(course, courses)), teachers)
+      
+      private def _updateCoursesIfNecessary(course: Course): Sequence[Course] = (school, course) match
+        case (School(_, courses), Course(name)) if school.hasCourse(name) => courses
+        case (School(_, courses), newCourse) => Cons(newCourse, courses)
 
 @main def examples(): Unit =
   import SchoolModel.BasicSchoolModule.*

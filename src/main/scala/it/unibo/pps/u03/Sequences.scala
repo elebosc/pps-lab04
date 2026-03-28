@@ -1,5 +1,10 @@
 package it.unibo.pps.u03
 
+import it.unibo.pps.u03.Optionals.Optional
+import it.unibo.pps.u03.Optionals.Optional.{Empty, Just}
+
+import scala.annotation.tailrec
+
 object Sequences: // Essentially, generic linkedlists
   
   enum Sequence[E]:
