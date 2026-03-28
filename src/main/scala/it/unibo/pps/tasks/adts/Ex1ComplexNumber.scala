@@ -22,24 +22,39 @@ object Ex1ComplexNumber:
     case class ComplexNumber(real: Double, imaginary: Double)
 
     type Complex = ComplexNumber
+    
     def complex(re: Double, im: Double): Complex = ComplexNumber(re, im)
+    
     extension (complex: Complex)
-      def re(): Double = complex.real
-      def im(): Double = complex.imaginary
-      def sum(other: Complex): Complex = ComplexNumber(complex.real + other.real, complex.imaginary + other.imaginary)
-      def subtract(other: Complex): Complex = ComplexNumber(complex.real - other.real, complex.imaginary - other.imaginary)
+      
+      def re(): Double = complex match
+        case ComplexNumber(real, _) => real
+        
+      def im(): Double = complex match
+        case ComplexNumber(_, imaginary) => imaginary
+        
+      def sum(other: Complex): Complex = (complex, other) match
+        case (ComplexNumber(re1, im1), ComplexNumber(re2, im2)) => ComplexNumber(re1 + re2, im1 + im2)
+          
+      def subtract(other: Complex): Complex = (complex, other) match
+        case (ComplexNumber(re1, im1), ComplexNumber(re2, im2)) => ComplexNumber(re1 - re2, im1 - im2)
+          
       def asString(): String = complex match
-        case c if c.real != 0.0 || c.imaginary != 0.0 => s"${_realAsString()}${_signAsString()}${_imaginaryAsString()}"
-        case _ => s"${complex.real}"
-      private def _realAsString(): String = complex.real match
-        case re if re != 0.0 => s"$re"
+        case ComplexNumber(re, im) if re != 0.0 || im != 0.0 => 
+          s"${_realAsString()}${_signAsString()}${_imaginaryAsString()}"
+        case ComplexNumber(re, _) => s"$re"
+        
+      private def _realAsString(): String = complex match
+        case ComplexNumber(re, _) if re != 0.0 => s"$re"
         case _ => ""
+        
       private def _signAsString(): String = complex match
-        case c if c.real != 0.0 && c.imaginary > 0.0 => " + "
-        case c if c.real != 0.0 && c.imaginary < 0.0 => " - "
-        case c if c.real == 0.0 && c.imaginary < 0.0 => "-"
+        case ComplexNumber(re, im) if re != 0.0 && im > 0.0 => " + "
+        case ComplexNumber(re, im) if re != 0.0 && im < 0.0 => " - "
+        case ComplexNumber(re, im) if re == 0.0 && im < 0.0 => "-"
         case _ => ""
-      private def _imaginaryAsString(): String = complex.imaginary match
-        case im if im > 0.0 => s"${im}i"
-        case im if im < 0.0 => s"${-im}i"
+        
+      private def _imaginaryAsString(): String = complex match
+        case ComplexNumber(_, im) if im > 0.0 => s"${im}i"
+        case ComplexNumber(_, im) if im < 0.0 => s"${-im}i"
         case _ => ""
