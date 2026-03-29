@@ -26,7 +26,7 @@ object Sequences:
         case Cons(_, t)            => t.filter(pred)
         case Nil()                 => Nil()
 
-      def concat(s2: Sequence[A]): Sequence[A] = 
+      def concat(s2: Sequence[A]): Sequence[A] =
         def _concat(s1: Sequence[A])(sequence: Sequence[A]): Sequence[A] = (s1, s2) match
           case (s1, Nil()) => s1
           case (Nil(), s2) => s2
@@ -41,7 +41,7 @@ object Sequences:
           case Cons(h, t) => _reverse(t)(Cons(h, acc))
         _reverse(s)(Nil())
 
-      def flatMap[B](mapper: A => Sequence[B]): Sequence[B] = 
+      def flatMap[B](mapper: A => Sequence[B]): Sequence[B] =
         def _flatMap(s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = (s, mapper) match
           case (Nil(), m) => Nil()
           case (Cons(h, t), m) => m(h).concat(_flatMap(t)(m))
