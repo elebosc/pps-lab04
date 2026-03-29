@@ -3,6 +3,7 @@ package it.unibo.pps.tasks.adts
 import it.unibo.pps.u03.extensionmethods.Sequences.Sequence
 import Sequence.*
 import it.unibo.pps.u03.Optionals.Optional
+import it.unibo.pps.u03.Optionals.Optional.{Just, Empty}
 
 import scala.annotation.tailrec
 
@@ -143,6 +144,12 @@ object SchoolModel:
           case Teacher(name, _) => name
         }
 
+      def hasTeacher(name: String): Boolean =
+        !school.teachers.filter(teacher => teacher == name).equals(Nil())
+
+      def hasCourse(name: String): Boolean =
+        !school.courses.filter(course => course == name).equals(Nil())
+
       def setTeacherToCourse(teacher: Teacher, course: Course): School =
         val updatedTeachers = _updateTeachersIfNecessary(teacher, course)
         val updatedCourses = _updateCoursesIfNecessary(course)
@@ -159,28 +166,35 @@ object SchoolModel:
             case Course(name) => name
           }
       
-      def hasTeacher(name: String): Boolean =
-        !school.teachers.filter(teacher => teacher == name).equals(Nil())
-
-      def hasCourse(name: String): Boolean =
-        !school.courses.filter(course => course == name).equals(Nil())
-      
       private def _teacherHasCourse(teacher: Teacher, course: Course): Boolean = teacher match
         case Teacher(_, courses) => !courses.filter(c => c.equals(course)).equals(Nil())
       
-      private def _updateTeachersIfNecessary(teacher: Teacher, course: Course): Sequence[Teacher] =
-        (school, teacher) match
-          case (School(teachers, _), Teacher(name, courses)) if school.hasTeacher(name) && _teacherHasCourse(teacher, course) =>
-            teachers
-          case (School(teachers, _), Teacher(name, courses)) if school.hasTeacher(name) && !_teacherHasCourse(teacher, course) =>
+      private def _updateTeachersIfNecessary(searchedTeacher: Teacher, searchedCourse: Course): Sequence[Teacher] = {
+        val foundTeacher = _getTeacherIfPresent(searchedTeacher)
+        (school, foundTeacher, searchedTeacher) match
+          case (School(teachers, _), Just(teacher), _) if _teacherHasCourse(teacher, searchedCourse) => teachers
+          case (School(teachers, _), Just(Teacher(name, courses)), _) =>
             Cons(
-              _teacher(name, Cons(course, courses)),
+              _teacher(name, Cons(searchedCourse, courses)),
               teachers.filter {
-                case Teacher(n, _) => n == name
+                case Teacher(n, _) => n != name
               }
             )
-          case (School(teachers, _), Teacher(name, courses)) => Cons(_teacher(name, Cons(course, courses)), teachers)
+          case (School(teachers, _), Empty(), Teacher(name, courses)) => 
+            Cons(_teacher(name, Cons(searchedCourse, courses)), teachers)
+      }
       
+      private def _getTeacherIfPresent(teacher: Teacher): Optional[Teacher] =
+        @tailrec
+        def __getTeacherIfPresent(teachers: Sequence[Teacher]): Optional[Teacher] =
+          (teachers, teacher) match
+            case (Nil(), _) => Empty()
+            case (Cons(Teacher(currName, currCourses), _), Teacher(searchedName, _)) if currName == searchedName =>
+              Just(_teacher(currName, currCourses))
+            case (Cons(_, otherTeachers), _) => __getTeacherIfPresent(otherTeachers)
+        school match
+          case School(teachers, _) => __getTeacherIfPresent(teachers)
+
       private def _updateCoursesIfNecessary(course: Course): Sequence[Course] = (school, course) match
         case (School(_, courses), Course(name)) if school.hasCourse(name) => courses
         case (School(_, courses), newCourse) => Cons(newCourse, courses)
