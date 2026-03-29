@@ -9,103 +9,103 @@ import org.junit.Assert.{assertEquals, assertFalse, assertTrue}
 class SchoolTests:
 
   @Test def testEmptySchoolHasNoTeachers(): Unit =
-    val school = emptySchool
-    val teachers = school.teachers
+    val teachers = emptySchool.teachers
     val expectedTeachers = Nil()
     assertEquals(expectedTeachers, teachers)
 
   @Test def testEmptySchoolHasNoCourses(): Unit =
-    val school = emptySchool
-    val courses = school.courses
+    val courses = emptySchool.courses
     val expectedCourses = Nil()
     assertEquals(expectedCourses, courses)
 
   @Test def testMissingTeacherIsNotFound(): Unit =
-    val school = emptySchool
-    assertFalse(school.hasTeacher("John"))
+    val hasTeacher = emptySchool.hasTeacher("John")
+    assertFalse(hasTeacher)
 
   @Test def testMissingCourseIsNotFound(): Unit =
-    val school = emptySchool
-    assertFalse(school.hasCourse("Math"))
+    val hasCourse = emptySchool.hasCourse("Math")
+    assertFalse(hasCourse)
 
   @Test def setTeacherIsAssigned(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
-    val school2 = school.setTeacherToCourse(john, math)
-    val teachers = school2.teachers
+    val teachers = emptySchool
+      .setTeacherToCourse(john, math)
+      .teachers
     val expectedTeachers = Cons("John", Nil())
     assertEquals(expectedTeachers, teachers)
 
   @Test def setCourseIsAssigned(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
-    val school2 = school.setTeacherToCourse(john, math)
-    val courses = school2.courses
+    val courses = emptySchool
+      .setTeacherToCourse(john, math)
+      .courses
     val expectedCourses = Cons("Math", Nil())
     assertEquals(expectedCourses, courses)
 
   @Test def testAssignedTeacherIsFound(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
-    val school2 = school.setTeacherToCourse(john, math)
-    assertTrue(school2.hasTeacher("John"))
+    val hasTeacher = emptySchool
+      .setTeacherToCourse(john, math)
+      .hasTeacher("John")
+    assertTrue(hasTeacher)
 
   @Test def testAssignedCourseIsFound(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
-    val school2 = school.setTeacherToCourse(john, math)
-    assertTrue(school2.hasCourse("Math"))
+    val hasCourse = emptySchool
+      .setTeacherToCourse(john, math)
+      .hasCourse("Math")
+    assertTrue(hasCourse)
 
   @Test def testNotAssignedCourseIsNotFound(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
-    val school2 = school.setTeacherToCourse(john, math)
-    assertFalse(school2.hasCourse("Italian"))
+    val hasCourse = emptySchool
+      .setTeacherToCourse(john, math)
+      .hasCourse("Italian")
+    assertFalse(hasCourse)
 
   @Test def testSameTeacherIsNotAddedTwice(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
     val italian = course("Italian")
-    val school2 = school.setTeacherToCourse(john, math)
-    val school3 = school2.setTeacherToCourse(john, italian)
-    val teachers = school3.teachers
+    val teachers = emptySchool
+      .setTeacherToCourse(john, math)
+      .setTeacherToCourse(john, italian)
+      .teachers
     val expectedTeachers = Cons("John", Nil())
     assertEquals(expectedTeachers, teachers)
 
   @Test def testSameCourseIsNotAddedTwice(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val math = course("Math")
-    val school2 = school.setTeacherToCourse(john, math)
-    val school3 = school.setTeacherToCourse(john, math)
-    val courses = school3.courses
+    val courses = emptySchool
+      .setTeacherToCourse(john, math)
+      .setTeacherToCourse(john, math)
+      .courses
     val expectedCourses = Cons("Math", Nil())
     assertEquals(expectedCourses, courses)
 
   @Test def testCoursesOfTeacherAreListedCorrectly(): Unit =
-    val school = emptySchool
     val john = teacher("John")
     val mark = teacher("Mark")
     val math = course("Math")
     val science = course("Science")
     val italian = course("Italian")
-    val school2 = school.setTeacherToCourse(john, math)
-    val school3 = school2.setTeacherToCourse(mark, italian)
-    val school4 = school3.setTeacherToCourse(john, science)
-    val courses = school4.coursesOfATeacher(john)
+    val courses = emptySchool
+      .setTeacherToCourse(john, math)
+      .setTeacherToCourse(mark, italian)
+      .setTeacherToCourse(john, science)
+      .coursesOfATeacher(john)
     val expectedCourses = Cons("Science", Cons("Math", Nil()))
     assertEquals(expectedCourses, courses)
   
   @Test def testCoursesListOfMissingTeacherIsEmpty(): Unit =
-    val school = emptySchool
     val john = teacher("John")
-    val courses = school.coursesOfATeacher(john)
+    val courses = emptySchool.coursesOfATeacher(john)
     val expectedCourses = Nil()
     assertEquals(expectedCourses, courses)
     
