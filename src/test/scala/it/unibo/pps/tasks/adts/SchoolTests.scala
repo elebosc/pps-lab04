@@ -26,6 +26,20 @@ class SchoolTests:
     val hasCourse = emptySchool.hasCourse("Math")
     assertFalse(hasCourse)
 
+  @Test def testTeacherCreation(): Unit =
+    val newTeacher = teacher("John")
+    val name = newTeacher match
+      case Teacher(name, _) => name
+    val expectedName = "John"
+    assertEquals(expectedName, name)
+
+  @Test def testCourseCreation(): Unit =
+    val newCourse = course("Math")
+    val name = newCourse match
+      case Course(name) => name
+    val expectedName = "Math"
+    assertEquals(expectedName, name)
+
   @Test def setTeacherIsAssigned(): Unit =
     val john = teacher("John")
     val math = course("Math")
