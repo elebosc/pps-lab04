@@ -1,7 +1,7 @@
 package it.unibo.pps.tasks.adts
 
 import it.unibo.pps.u03.extensionmethods.Sequences.Sequence, Sequence.*
-import it.unibo.pps.u03.Optionals.Optional
+import it.unibo.pps.u03.Optionals.Optional, Optional.*
 
 /*  Exercise 3: 
  *  Implement a Stack ADT
@@ -32,7 +32,7 @@ object Ex3Stack:
       def push(a: A): Stack[A] = Cons(a, stack)
 
       def pop(): Optional[(A, Stack[A])] = stack match
-        case Nil() => Optional.Empty()
-        case Cons(h, t) => Optional.Just(h, t)
+        case Nil() => Empty()
+        case Cons(h, t) => Just(h, t)
 
       def asSequence(): Sequence[A] = stack
